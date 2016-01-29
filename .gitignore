@@ -26,3 +26,16 @@
 *.exe
 *.out
 *.app
+
+# Temporary Files
+~*.f
+*.~f
+
+# Output files
+*.dat
+*.csv
+
+# Reports
+*.doc*
+*.xls*
+*.pdf

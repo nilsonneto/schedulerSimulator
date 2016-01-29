@@ -4,21 +4,23 @@ C     Declaracoes
       real*8 tfim(3000),tfila(3000),tsis(3000),tcpu(3000)
       real*8 trest(3000),ratual,rprox,montreal,rtowrite
       integer iseed,is,numrand,numproc,nextI,prevI,sizef(3000)
+      integer stseed, endseed
 
       open(1, file= 'table.csv',status = 'unknown')
 
 C     Formatos
-11    format('NProc,       TEC     ,        TS     ,     T Real    ,
-     *T Inicio   ,      T Fim    ,      T Fila   ,   T Sistema   ,   T C
-     *PU Ociosa,#Fila,    T Restante')
-12    format(I5,',',F15.10,',',F15.10,',',F15.10,',',F15.10,',',F15.10,'
-     *,',F15.10,',',F15.10,',',F15.10,',',I5,',',F15.10)
+11    format('# Processo,T Entre Chegadas,T Servico,T Real,T Inicio,T Fi
+     *m,T Fila,T Sistema,T CPU Ociosa,Size Fila,T Restante,Seed')
+12    format(I5,',',F14.6,',',F14.6,',',F14.6,',',F14.6,',',F14.6,',',F1
+     *4.6,',',F14.6,',',F14.6,',',I9,',',F14.6,',',I9)
 C 13    format(I5,',',F15.10)
       
 C     Variaveis Fixas
       is = 1
       numrand = 10000
       numproc = 1000
+      stseed = 37
+      endseed = 63
 
 C     Inicializacao
       write(1,11)
@@ -42,7 +44,7 @@ C     Inicializacao
       montreal = 0
       rtowrite = 0
 
-      do is=15,75
+      do is=stseed,endseed
 C         Gerar Aleatorios
           iseed = is
           pmod = 2147483647.D0
@@ -137,7 +139,7 @@ C               Encontrar proximo
 
 C     Se escreve rtowrite pois e o valor previo do treal, se mudou------
       write(1,12)i,tec(i),ts(i),rtowrite,tini(i),tfim(i),tfila(i),tsis(i
-     *),tcpu(i),sizef(i),trest(i)
+     *),tcpu(i),sizef(i),trest(i),is
 
 C         Se rtowrite e treal, processo entrou na fila     
           if (rtowrite /= treal(i)) then
@@ -148,7 +150,12 @@ C         Se rtowrite e treal, processo entrou na fila
 C         Inicio do loop principal
 666       if (nextI /= 0) then
              i = nextI
-             tini(i) = tfim(prevI) + tcpu(prevI)
+             if (treal(i) >= (tfim(prevI) + tcpu(prevI))) then
+                tini(i) = treal(i)
+             else
+                tini(i) = tfim(prevI) + tcpu(prevI)
+             end if
+             
              rtowrite = treal(i)
 
 C            Nao sera possivel terminar o processo
@@ -188,7 +195,7 @@ C            T S R I F Y C N L
 C            X X         X X X
 
       write(1,12)i,tec(i),ts(i),rtowrite,tini(i),tfim(i),tfila(i),tsis(i
-     *),tcpu(i),sizef(i),trest(i)
+     *),tcpu(i),sizef(i),trest(i),is
 
 C            Se rtowrite e treal, processo entrou na fila     
              if (rtowrite /= treal(i)) then
